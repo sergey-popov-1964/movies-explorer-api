@@ -20,14 +20,14 @@ app.use(
   cors({
     origin: [
       'http://localhost:3000',
-      'http://sergeykms.students.nomoredomains.club',
-      'https://sergeykms.students.nomoredomains.club',
-      'http://back.sergeykms.students.nomoredomains.club',
-      'http://back.sergeykms.students.nomoredomains.club/signin',
-      'http://back.sergeykms.students.nomoredomains.club/signup',
-      'https://back.sergeykms.students.nomoredomains.club',
-      'https://back.sergeykms.students.nomoredomains.club/signin',
-      'https://back.sergeykms.students.nomoredomains.club/signup',
+      // 'http://sergeykms.students.nomoredomains.club',
+      // 'https://sergeykms.students.nomoredomains.club',
+      // 'http://back.sergeykms.students.nomoredomains.club',
+      // 'http://back.sergeykms.students.nomoredomains.club/signin',
+      // 'http://back.sergeykms.students.nomoredomains.club/signup',
+      // 'https://back.sergeykms.students.nomoredomains.club',
+      // 'https://back.sergeykms.students.nomoredomains.club/signin',
+      // 'https://back.sergeykms.students.nomoredomains.club/signup',
     ],
     methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'],
     preflightContinue: false,
@@ -41,15 +41,15 @@ app.use(bodyParser.json());
 
 app.use(requestLogger);
 
-app.get('/crash-test', () => {
-  setTimeout(() => {
-    throw new Error('Сервер сейчас упадёт');
-  }, 0);
-});
+// app.get('/crash-test', () => {
+//   setTimeout(() => {
+//     throw new Error('Сервер сейчас упадёт');
+//   }, 0);
+// });
 
 app.post('/signin', celebrate({
   body: Joi.object().keys({
-    email: Joi.string().email().required(),
+    email: Joi.string().required().pattern(/.+@.+\..+/i),
     password: Joi.string().required().min(6).required()
       .max(30),
   }).unknown(true),
@@ -57,7 +57,7 @@ app.post('/signin', celebrate({
 
 app.post('/signup', celebrate({
   body: Joi.object().keys({
-    email: Joi.string().email().required(),
+    email: Joi.string().required().pattern(/.+@.+\..+/i),
     password: Joi.string().required().min(6).required()
       .max(30),
   }).unknown(true),
@@ -82,7 +82,7 @@ app.use((err, req, res, next) => {
     .send({message: statusCode === 500 ? 'На сервере произошла ошибка' : message});
 });
 
-mongoose.connect('mongodb://localhost:27017/mestodb', {
+mongoose.connect('mongodb://localhost:27017/bitfilmsdb', {
   useUnifiedTopology: true,
   useNewUrlParser: true,
   useCreateIndex: true,

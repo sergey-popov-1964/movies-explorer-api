@@ -1,18 +1,16 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
-const User = require('../models/users');
+const Users = require('../models/users.js');
 
-const getAllUsers = (req, res, next) => User.find({})
-  .then((user) => res.status(200).send({data: user}))
-  .catch(next);
+// const getAllUsers = (req, res, next) => Users.find({})
+//   .then((user) => res.status(200).send({data: user}))
+//   .catch(next);
 
 const createUser = (req, res, next) => {
   bcrypt.hash(req.body.password, 10)
-    .then((hash) => User.create({
+    .then((hash) => Users.create({
       name: req.body.name,
-      about: req.body.about,
-      avatar: req.body.avatar,
       email: req.body.email,
       password: hash,
     }))
@@ -35,31 +33,33 @@ const createUser = (req, res, next) => {
     .catch(next);
 };
 
-const getUserById = (req, res, next) => {
-  const {userId} = req.params;
-  return User.findById(userId)
-    .orFail(new Error('NotValidId'))
-    .then((user) => res.status(200).send({data: user}))
-    .catch((err) => {
-      if (err.message === 'NotValidId') {
-        const err = new Error('Пользователь по указанному _id не найден');
-        err.statusCode = 404;
-        next(err);
-      } else if (err.name === 'CastError') {
-        const err = new Error('Переданы некорректные данные');
-        err.statusCode = 400;
-        next(err);
-      } else {
-        next(err);
-      }
-    });
-};
+// const getUserById = (req, res, next) => {
+//   const {userId} = req.params;
+//   return Users.findById(userId)
+//     .orFail(new Error('NotValidId'))
+//     .then((user) => res.status(200).send({data: user}))
+//     .catch((err) => {
+//       if (err.message === 'NotValidId') {
+//         const err = new Error('Пользователь по указанному _id не найден');
+//         err.statusCode = 404;
+//         next(err);
+//       } else if (err.name === 'CastError') {
+//         const err = new Error('Переданы некорректные данные');
+//         err.statusCode = 400;
+//         next(err);
+//       } else {
+//         next(err);
+//       }
+//     });
+// };
 
+
+//При редактировании данных профиля сделать проверку на существование такого же емайла
 const updateProfile = (req, res, next) => {
   const ownerID = req.user._id;
   const {name, about} = req.body;
   const opts = {runValidators: true, new: true};
-  return User.findByIdAndUpdate(ownerID, {name, about}, opts)
+  return Users.findByIdAndUpdate(ownerID, {name, about}, opts)
     .orFail(new Error('NotValidId'))
     .then((user) => res.status(200).send({data: user}))
     .catch((err) => {
@@ -77,32 +77,32 @@ const updateProfile = (req, res, next) => {
     });
 };
 
-const updateAvatar = (req, res, next) => {
-  const ownerID = req.user._id;
-  const {avatar} = req.body;
-  const opts = {runValidators: true, new: true};
-  return User.findByIdAndUpdate(ownerID, {avatar}, opts)
-    .orFail(new Error('NotValidId'))
-    .then((user) => res.status(200).send({data: user}))
-    .catch((err) => {
-      if (err.message === 'NotValidId') {
-        const err = new Error('Пользователь по указанному _id не найден');
-        err.statusCode = 404;
-        next(err);
-      } else if (err.name === 'ValidationError' || err.name === 'CastError') {
-        const err = new Error('Переданы некорректные данные при обновлении профиля');
-        err.statusCode = 400;
-        next(err);
-      } else {
-        next(err);
-      }
-    });
-};
+// const updateAvatar = (req, res, next) => {
+//   const ownerID = req.user._id;
+//   const {avatar} = req.body;
+//   const opts = {runValidators: true, new: true};
+//   return Users.findByIdAndUpdate(ownerID, {avatar}, opts)
+//     .orFail(new Error('NotValidId'))
+//     .then((user) => res.status(200).send({data: user}))
+//     .catch((err) => {
+//       if (err.message === 'NotValidId') {
+//         const err = new Error('Пользователь по указанному _id не найден');
+//         err.statusCode = 404;
+//         next(err);
+//       } else if (err.name === 'ValidationError' || err.name === 'CastError') {
+//         const err = new Error('Переданы некорректные данные при обновлении профиля');
+//         err.statusCode = 400;
+//         next(err);
+//       } else {
+//         next(err);
+//       }
+//     });
+// };
 
 const login = (req, res, next) => {
   const { NODE_ENV, JWT_SECRET } = process.env;
   const {email, password} = req.body;
-  return User.findUserByCredentials(email, password)
+  return Users.findUserByCredentials(email, password)
     .then((user) => {
       let jwtKey = '';
       NODE_ENV === 'production' ? jwtKey = JWT_SECRET : jwtKey = 'some-secret-key';
@@ -117,7 +117,7 @@ const login = (req, res, next) => {
 };
 
 const getCurrentUser = (req, res, next) => {
-  return User.findById(req.user._id)
+  return Users.findById(req.user._id)
     .orFail(new Error('NotValidId'))
     .then((user) => res.status(200).send({data: user}))
     .catch((err) => {

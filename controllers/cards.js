@@ -1,4 +1,4 @@
-const Card = require('../models/cards');
+const Card = require('../models/movies');
 
 const createCard = (req, res, next) => {
   const ownerID = req.user._id;
