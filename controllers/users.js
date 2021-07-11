@@ -1,7 +1,7 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
-const Users = require('../models/users.js');
+const Users = require('../models/users');
 
 const createUser = (req, res, next) => {
   bcrypt.hash(req.body.password, 10)
@@ -30,7 +30,6 @@ const createUser = (req, res, next) => {
 };
 
 const updateProfile = (req, res, next) => {
-  console.log("updateProfile")
   const ownerID = req.user._id;
   const {name, email} = req.body;
   const opts = {runValidators: true, new: true};

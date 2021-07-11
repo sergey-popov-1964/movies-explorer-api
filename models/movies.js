@@ -2,54 +2,54 @@ const mongoose = require('mongoose');
 const isUrl = require('validator/lib/isURL');
 
 const movieSchema = new mongoose.Schema({
-  country : {
+  country: {
     type: String,
     required: true,
   },
-  director : {
+  director: {
     type: String,
     required: true,
   },
-  duration : {
+  duration: {
     type: Number,
     required: true,
   },
-  year : {
+  year: {
     type: String,
     required: true,
   },
-  description  : {
+  description: {
     type: String,
     required: true,
   },
-  image  : {
-    type: String,
-    required: true,
-    validate: [{ validator: isUrl }],
-  },
-  trailer  : {
+  image: {
     type: String,
     required: true,
     validate: [{ validator: isUrl }],
   },
-  thumbnail  : {
+  trailer: {
     type: String,
     required: true,
     validate: [{ validator: isUrl }],
   },
-  owner  : {
+  thumbnail: {
+    type: String,
+    required: true,
+    validate: [{ validator: isUrl }],
+  },
+  owner: {
     type: String,
     required: true,
   },
-  movieId  : {
+  movieId: {
     type: String,
     required: true,
   },
-  nameRU  : {
+  nameRU: {
     type: String,
     required: true,
   },
-  nameEN  : {
+  nameEN: {
     type: String,
     required: true,
   },
