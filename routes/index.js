@@ -1,8 +1,8 @@
 const routes = require('express').Router();
 const routesUser = require('./users');
-const routesCards = require('./cards');
+const routesMovies = require('./movies');
 
 routes.use('/', routesUser);
-routes.use('/', routesCards);
+routes.use('/', routesMovies);
 
 module.exports = routes;

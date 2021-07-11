@@ -3,10 +3,6 @@ const jwt = require('jsonwebtoken');
 require('dotenv').config();
 const Users = require('../models/users.js');
 
-// const getAllUsers = (req, res, next) => Users.find({})
-//   .then((user) => res.status(200).send({data: user}))
-//   .catch(next);
-
 const createUser = (req, res, next) => {
   bcrypt.hash(req.body.password, 10)
     .then((hash) => Users.create({
@@ -15,7 +11,7 @@ const createUser = (req, res, next) => {
       password: hash,
     }))
     .then((user) => {
-      const { password, ...publicUser } = user.toObject();
+      const {password, ...publicUser} = user.toObject();
       res.status(200).send({data: publicUser});
     })
     .catch((err) => {
@@ -33,33 +29,12 @@ const createUser = (req, res, next) => {
     .catch(next);
 };
 
-// const getUserById = (req, res, next) => {
-//   const {userId} = req.params;
-//   return Users.findById(userId)
-//     .orFail(new Error('NotValidId'))
-//     .then((user) => res.status(200).send({data: user}))
-//     .catch((err) => {
-//       if (err.message === 'NotValidId') {
-//         const err = new Error('Пользователь по указанному _id не найден');
-//         err.statusCode = 404;
-//         next(err);
-//       } else if (err.name === 'CastError') {
-//         const err = new Error('Переданы некорректные данные');
-//         err.statusCode = 400;
-//         next(err);
-//       } else {
-//         next(err);
-//       }
-//     });
-// };
-
-
-//При редактировании данных профиля сделать проверку на существование такого же емайла
 const updateProfile = (req, res, next) => {
+  console.log("updateProfile")
   const ownerID = req.user._id;
-  const {name, about} = req.body;
+  const {name, email} = req.body;
   const opts = {runValidators: true, new: true};
-  return Users.findByIdAndUpdate(ownerID, {name, about}, opts)
+  return Users.findByIdAndUpdate(ownerID, {name, email}, opts)
     .orFail(new Error('NotValidId'))
     .then((user) => res.status(200).send({data: user}))
     .catch((err) => {
@@ -71,43 +46,25 @@ const updateProfile = (req, res, next) => {
         const err = new Error('Переданы некорректные данные при обновлении профиля');
         err.statusCode = 400;
         next(err);
+      } else if (err.name === 'MongoError' && err.code === 11000) {
+        const err = new Error('Такой пользователь уже зарегистрирован');
+        err.statusCode = 409;
+        next(err);
       } else {
         next(err);
       }
     });
 };
 
-// const updateAvatar = (req, res, next) => {
-//   const ownerID = req.user._id;
-//   const {avatar} = req.body;
-//   const opts = {runValidators: true, new: true};
-//   return Users.findByIdAndUpdate(ownerID, {avatar}, opts)
-//     .orFail(new Error('NotValidId'))
-//     .then((user) => res.status(200).send({data: user}))
-//     .catch((err) => {
-//       if (err.message === 'NotValidId') {
-//         const err = new Error('Пользователь по указанному _id не найден');
-//         err.statusCode = 404;
-//         next(err);
-//       } else if (err.name === 'ValidationError' || err.name === 'CastError') {
-//         const err = new Error('Переданы некорректные данные при обновлении профиля');
-//         err.statusCode = 400;
-//         next(err);
-//       } else {
-//         next(err);
-//       }
-//     });
-// };
-
 const login = (req, res, next) => {
-  const { NODE_ENV, JWT_SECRET } = process.env;
+  const {NODE_ENV, JWT_SECRET} = process.env;
   const {email, password} = req.body;
   return Users.findUserByCredentials(email, password)
     .then((user) => {
       let jwtKey = '';
       NODE_ENV === 'production' ? jwtKey = JWT_SECRET : jwtKey = 'some-secret-key';
       const token = jwt.sign({_id: user._id}, jwtKey, {expiresIn: '7d'});
-      res.send({ token });
+      res.send({token});
     })
     .catch((e) => {
       const err = new Error('Ошибка авторизации11');
@@ -136,5 +93,5 @@ const getCurrentUser = (req, res, next) => {
 };
 
 module.exports = {
-  getAllUsers, createUser, getUserById, updateProfile, updateAvatar, login, getCurrentUser,
+  createUser, updateProfile, login, getCurrentUser,
 };
