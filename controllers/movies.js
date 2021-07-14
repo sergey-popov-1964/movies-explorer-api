@@ -58,7 +58,19 @@ const createMovie = (req, res, next) => {
 };
 
 const getAllMovies = (req, res) => Movie.find({})
-  .then((movie) => res.status(200).send({ data: movie }))
+  .then(() => res.status(200) .send({
+    country,
+    director,
+    duration,
+    year,
+    description,
+    image,
+    trailer,
+    nameRU,
+    nameEN,
+    thumbnail,
+    movieId,
+  }))
   .catch((err) => res.status(500).send({ message: err.message }));
 
 const deleteMovie = (req, res, next) => {
