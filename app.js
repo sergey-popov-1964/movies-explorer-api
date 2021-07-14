@@ -1,15 +1,17 @@
 const express = require('express');
 const cors = require('cors');
+require('dotenv').config();
 const helmet = require('helmet');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const { errors } = require('celebrate');
-const { celebrate, Joi } = require('celebrate');
-const auth = require('./middlewares/auth');
-const {createUser, login} = require('./controllers/users');
+const { limiter } = require('./middlewares/limiter');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
+const { MONGO_URL } = require('./config');
+const NotFoundErr = require('./errors/not-found-err');
+const handlererror = require('./middlewares/handlererror');
 
-const {PORT = 3000} = process.env;
+const { PORT = 3001 } = process.env;
 const routes = require('./routes/index');
 
 const app = express();
@@ -39,49 +41,26 @@ app.use(
 
 app.use(bodyParser.json());
 
+app.use(limiter);
 app.use(requestLogger);
 
-app.post('/signin', celebrate({
-  body: Joi.object().keys({
-    email: Joi.string().required().pattern(/.+@.+\..+/i),
-    password: Joi.string().required().min(6).required()
-      .max(30),
-  }).unknown(true),
-}), login);
-
-app.post('/signup', celebrate({
-  body: Joi.object().keys({
-    email: Joi.string().required().pattern(/.+@.+\..+/i),
-    password: Joi.string().required().min(6).required()
-      .max(30),
-  }).unknown(true),
-}), createUser);
-
-app.use(auth);
 app.use(routes);
 
 routes.use((req, res, next) => {
-  const err = new Error('Запрашиваемый ресурс не найден');
-  err.statusCode = 404;
-  next(err);
+  next(new NotFoundErr('Запрашиваемый ресурс не найден'));
 });
 
 app.use(errorLogger);
 
 app.use(errors());
 
-app.use((err, req, res, next) => {
-  const {statusCode = 500, message} = err;
-  res.status(statusCode)
-    .send({message: statusCode === 500 ? 'На сервере произошла ошибка' : message});
-});
+app.use(handlererror);
 
-mongoose.connect('mongodb://localhost:27017/bitfilmsdb', {
+mongoose.connect(MONGO_URL, {
   useUnifiedTopology: true,
   useNewUrlParser: true,
   useCreateIndex: true,
   useFindAndModify: false,
 });
 
-app.listen(PORT, () => {
-});
+app.listen(PORT);

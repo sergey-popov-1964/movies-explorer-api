@@ -13,13 +13,5 @@ module.exports = {
   },
   rules: {
     'no-underscore-dangle': ['off', { allow: ['id'] }],
-    'linebreak-style': 0,
-    'object-curly-spacing': 'off',
-    'no-unused-vars': 'off',
-    'no-shadow': 'off',
-    'consistent-return': 'off',
-    'func-names': 'off',
-    'arrow-body-style': 'off',
-    'no-unused-expressions': 'off',
   },
 };

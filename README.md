@@ -19,5 +19,5 @@
 - MongoDB
 
 # Домен, по которому можно обратиться к серверу
-http://api.sergey_popov.nomoredomains.rocks
-https://api.sergey_popov.nomoredomains.rocks
+http://api.sergeypopov.nomoredomains.rocks
+https://api.sergeypopov.nomoredomains.rocks

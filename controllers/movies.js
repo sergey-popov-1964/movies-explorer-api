@@ -1,4 +1,7 @@
 const Movie = require('../models/movies');
+const BadRequestErr = require('../errors/bad-request-err');
+const NotFoundErr = require('../errors/not-found-err');
+const ForbiddenErr = require('../errors/forbidden-err');
 
 const createMovie = (req, res, next) => {
   const ownerID = req.user._id;
@@ -29,44 +32,61 @@ const createMovie = (req, res, next) => {
     movieId,
     owner: ownerID,
   })
-    .then((card) => res.status(200).send({data: card}))
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        const err = new Error('Переданы некорректные данные при создании фильма');
-        err.statusCode = 400;
-        next(err);
+    .then(() => res.status(200)
+      .send({
+        country,
+        director,
+        duration,
+        year,
+        description,
+        image,
+        trailer,
+        nameRU,
+        nameEN,
+        thumbnail,
+        movieId,
+      }))
+    .catch((error) => {
+      if (error.name === 'ValidationError') {
+        next(new BadRequestErr('Переданы некорректные данные при создании фильма'));
+        // const err = new Error('Переданы некорректные данные при создании фильма');
+        // err.statusCode = 400;
+        // next(err);
       }
-      next(err);
+      next(error);
     });
 };
 
 const getAllMovies = (req, res) => Movie.find({})
-  .then((movie) => res.status(201).send({data: movie}))
-  .catch((err) => res.status(500).send({message: err.message}));
+  .then((movie) => res.status(200).send({ data: movie }))
+  .catch((err) => res.status(500).send({ message: err.message }));
 
 const deleteMovie = (req, res, next) => {
-  const {movieId} = req.params;
+  const { movieId } = req.params;
   return Movie.findById(movieId)
     .orFail(new Error('NotValidId'))
     .then((movie) => {
       if (movie.owner !== (req.user._id)) {
-        const err = new Error('Редактирование/удаление чужих данных запрещено');
-        err.statusCode = 403;
-        next(err);
+        next(new ForbiddenErr('Редактирование/удаление чужих данных запрещено'));
+        // const err = new Error('Редактирование/удаление чужих данных запрещено');
+        // err.statusCode = 403;
+        // next(err);
       } else {
-        return Movie.findByIdAndRemove(movieId)
-          .then((movie) => res.status(201).send({data: movie}));
+        Movie.findByIdAndRemove(movieId)
+          .then((mov) => res.status(201).send({ data: mov }));
       }
     })
     .catch((err) => {
       if (err.message === 'NotValidId') {
-        const err = new Error('Фильм с указанным _id не найден');
-        err.statusCode = 404;
-        next(err);
+        next(new NotFoundErr('Фильм с указанным _id не найден'));
+        // const err = new Error('Фильм с указанным _id не найден');
+        // err.statusCode = 404;
+        // next(err);
       } else if (err.name === 'CastError') {
-        const err = new Error('Переданы некорректные данные');
-        err.statusCode = 400;
-        next(err);
+        next(new BadRequestErr('Переданы некорректные данные'));
+        // const err = new Error('Переданы некорректные данные');
+        // err.statusCode = 400;
+        // next(err);
       } else {
         next(err);
       }

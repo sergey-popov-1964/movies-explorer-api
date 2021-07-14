@@ -1,5 +1,6 @@
 const routesMovie = require('express').Router();
 const { celebrate, Joi } = require('celebrate');
+const validator = require('validator');
 const { requestLogger, errorLogger } = require('../middlewares/logger');
 
 routesMovie.use(requestLogger);
@@ -21,21 +22,31 @@ routesMovie.post('/movies', celebrate({
     duration: Joi.number().required(),
     year: Joi.string().min(4).max(4).required(),
     description: Joi.string().required(),
-    image: Joi.string().required().pattern(/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_.~#?&//=]*)/),
-    trailer: Joi.string().required().pattern(/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_.~#?&//=]*)/),
-    thumbnail: Joi.string().required().pattern(/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_.~#?&//=]*)/),
-    owner: Joi.string().hex().length(24),
-    movieId: Joi.string().hex().length(24),
+    image: Joi.string().required().custom((value, helpers) => {
+      if (validator.isURL(value)) {
+        return value;
+      }
+      return helpers.message('Поле image заполненно некорректно');
+    }),
+    trailer: Joi.string().required().custom((value, helpers) => {
+      if (validator.isURL(value)) {
+        return value;
+      }
+      return helpers.message('Поле trailer заполненно некорректно');
+    }),
+    thumbnail: Joi.string().required().custom((value, helpers) => {
+      if (validator.isURL(value)) {
+        return value;
+      }
+      return helpers.message('Поле thumbnail заполненно некорректно');
+    }),
+    movieId: Joi.number(),
     nameRU: Joi.string().required(),
     nameEN: Joi.string().required(),
   }).unknown(true),
 }), createMovie);
 
-routesMovie.delete('/movies/:movieId', celebrate({
-  params: Joi.object().keys({
-    movieId: Joi.string().hex().length(24),
-  }),
-}), deleteMovie);
+routesMovie.delete('/movies/:movieId', deleteMovie);
 
 routesMovie.use(errorLogger);
 
