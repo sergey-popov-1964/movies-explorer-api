@@ -13,7 +13,7 @@ routesUser.get('/users/me', getCurrentUser);
 routesUser.patch('/users/me', celebrate({
   body: Joi.object().keys({
     name: Joi.string().required().min(2).max(30),
-    email: Joi.string().email(),
+    email: Joi.string().email().required(),
   }).unknown(true),
 }), updateProfile);
 

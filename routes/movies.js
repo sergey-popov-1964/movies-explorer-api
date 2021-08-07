@@ -9,11 +9,14 @@ const {
   createMovie, getAllMovies, deleteMovie,
 } = require('../controllers/movies');
 
-routesMovie.get('/movies', celebrate({
-  headers: Joi.object({
-    authorization: Joi.string().required(),
-  }).unknown(true),
-}), getAllMovies);
+routesMovie.get('/movies', getAllMovies);
+
+
+//   , celebrate({
+//   headers: Joi.object({
+//     authorization: Joi.string().required(),
+//   }).unknown(true),
+// }), getAllMovies);
 
 routesMovie.post('/movies', celebrate({
   body: Joi.object().keys({
@@ -40,7 +43,7 @@ routesMovie.post('/movies', celebrate({
       }
       return helpers.message('Поле thumbnail заполненно некорректно');
     }),
-    movieId: Joi.number(),
+    movieId: Joi.number().required(),
     nameRU: Joi.string().required(),
     nameEN: Joi.string().required(),
   }).unknown(true),

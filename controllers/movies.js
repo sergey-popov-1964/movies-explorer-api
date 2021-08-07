@@ -32,20 +32,21 @@ const createMovie = (req, res, next) => {
     movieId,
     owner: ownerID,
   })
-    .then(() => res.status(200)
-      .send({
-        country,
-        director,
-        duration,
-        year,
-        description,
-        image,
-        trailer,
-        nameRU,
-        nameEN,
-        thumbnail,
-        movieId,
-      }))
+    .then((movie) => res.status(200).send({ data: movie }))
+    // .then((movie) => res.status(200)
+      // .send({
+      //   country,
+      //   director,
+      //   duration,
+      //   year,
+      //   description,
+      //   image,
+      //   trailer,
+      //   nameRU,
+      //   nameEN,
+      //   thumbnail,
+      //   movieId,
+      // }))
     .catch((error) => {
       if (error.name === 'ValidationError') {
         next(new BadRequestErr('Переданы некорректные данные при создании фильма'));
@@ -54,7 +55,7 @@ const createMovie = (req, res, next) => {
     });
 };
 
-const getAllMovies = (req, res) => Movie.find({})
+const getAllMovies = (req, res) => Movie.find({}).select('-owner')
   .then((movie) => res.status(200).send({ data: movie }))
   .catch((err) => res.status(500).send({ message: err.message }));
 
